@@ -14,83 +14,98 @@
       justify-content: center;
       background: #f7f3e8;
       overflow: hidden;
-      font-family: sans-serif;
     }
 
-    /* 容器設定 */
     .container {
       position: relative;
-      width: 300px;
-      height: 400px;
+      width: 200px;
+      height: 200px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: center;
     }
 
-    /* 資料夾樣式 */
+    /* 資料夾容器 */
     .folder-wrapper {
       position: relative;
       width: 128px;
       height: 128px;
-      z-index: 10;
+      z-index: 2;
     }
 
     /* 文件樣式 */
-    .file-icon {
+    .file {
       position: absolute;
-      width: 80px;
-      height: 100px;
+      width: 50px;
+      height: 65px;
       background: white;
       border: 1px solid #ddd;
       border-radius: 4px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       display: flex;
-      align-items: center;
-      justify-content: center;
-      top: 50px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 5;
-      pointer-events: none;
-      transition: all 0.6s cubic-bezier(0.45, 0, 0.55, 1);
-    }
-
-    .file-icon img {
-      width: 90%;
-      height: 90%;
-      object-fit: cover;
-    }
-
-    /* 飛入動畫狀態 */
-    .file-icon.fly-in {
-      top: 280px; /* 目標位置 */
-      transform: translateX(-50%) scale(0.2);
+      flex-direction: column;
+      padding: 5px;
+      box-sizing: border-box;
+      z-index: 1;
       opacity: 0;
+      pointer-events: none;
+      top: -150px; /* 起始位置在上方 */
     }
 
-    /* 按鈕樣式 */
+    .file-line {
+      height: 4px;
+      background: #eee;
+      margin-bottom: 5px;
+      width: 100%;
+    }
+
+    /* 動畫效果 */
+    @keyframes fileFlyIn {
+      0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 0;
+      }
+      20% {
+        opacity: 1;
+      }
+      80% {
+        transform: translate(0, 160px) scale(0.6) rotate(10deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(0, 180px) scale(0.2) rotate(20deg);
+        opacity: 0;
+      }
+    }
+
+    .animate-file {
+      animation: fileFlyIn 1.2s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+    }
+
     button {
       margin-top: 50px;
       padding: 10px 20px;
       cursor: pointer;
+      background: #ffd23f;
       border: none;
-      background: #FFD23F;
-      border-radius: 8px;
+      border-radius: 5px;
       font-weight: bold;
-      color: #5c4300;
+      color: #555;
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <div class="file-icon" id="file">
-      <div style="font-size: 10px; color: #999;">📄 PDF</div>
+    <div id="file" class="file">
+      <div class="file-line" style="width: 70%"></div>
+      <div class="file-line"></div>
+      <div class="file-line"></div>
+      <div class="file-line" style="width: 40%"></div>
     </div>
 
     <div class="folder-wrapper">
-      <svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="Yellow glass folder icon">
+      <svg viewBox="0 0 64 64" width="100%" height="100%">
         <defs>
           <linearGradient id="yellowGlass" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0" stop-color="#FFF9D7" stop-opacity="0.98"/>
@@ -121,30 +136,23 @@
         </defs>
         <path d="M6 20c0-1.1.9-2 2-2h12l3-3h22c1.1 0 2 .9 2 2v24c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V20z" fill="url(#yellowGlass)" filter="url(#innerShadow)"/>
         <path d="M6 20c0-1.1.9-2 2-2h12l3-3h22c1.1 0 2 .9 2 2v24c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V20z" fill="url(#amberDepth)" opacity="0.85"/>
-        <path d="M6 20c0-1.1.9-2 2-2h12l3-3h22c1.1 0 2 .9 2 2v24c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V20z" fill="none" stroke="url(#edgeGlow)" stroke-width="0.8" opacity="0.7"/>
         <path d="M11 17h10l3-3h18c1.1 0 2 .9 2 2v2H11v-1z" fill="url(#tabGlass)"/>
+        <path d="M6 20c0-1.1.9-2 2-2h12l3-3h22c1.1 0 2 .9 2 2v24c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V20z" fill="none" stroke="url(#edgeGlow)" stroke-width="0.8" opacity="0.7"/>
       </svg>
     </div>
   </div>
 
-  <button onclick="triggerFlyIn()">點擊存入文件</button>
+  <button onclick="playAnimation()">開始存檔</button>
 
   <script>
-    function triggerFlyIn() {
+    function playAnimation() {
       const file = document.getElementById('file');
-      
-      // 重置狀態以便重複測試
-      file.classList.remove('fly-in');
+      // 重置動畫
+      file.classList.remove('animate-file');
       void file.offsetWidth; // 強制重繪
-      
-      // 加入飛入類名
-      file.classList.add('fly-in');
-      
-      // 動畫結束後恢復（實際應用中通常是移除該 DOM）
-      setTimeout(() => {
-        file.classList.remove('fly-in');
-      }, 1000);
+      file.classList.add('animate-file');
     }
   </script>
+
 </body>
 </html>
