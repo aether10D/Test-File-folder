@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文件飛入資料夾動畫</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f7f3e8;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    /* 容器設定 */
+    .container {
+      position: relative;
+      width: 300px;
+      height: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    /* 資料夾樣式 */
+    .folder-wrapper {
+      position: relative;
+      width: 128px;
+      height: 128px;
+      z-index: 10;
+    }
+
+    /* 文件樣式 */
+    .file-icon {
+      position: absolute;
+      width: 80px;
+      height: 100px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      pointer-events: none;
+      transition: all 0.6s cubic-bezier(0.45, 0, 0.55, 1);
+    }
+
+    .file-icon img {
+      width: 90%;
+      height: 90%;
+      object-fit: cover;
+    }
+
+    /* 飛入動畫狀態 */
+    .file-icon.fly-in {
+      top: 280px; /* 目標位置 */
+      transform: translateX(-50%) scale(0.2);
+      opacity: 0;
+    }
+
+    /* 按鈕樣式 */
+    button {
+      margin-top: 50px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border: none;
+      background: #FFD23F;
+      border-radius: 8px;
+      font-weight: bold;
+      color: #5c4300;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="file-icon" id="file">
+      <div style="font-size: 10px; color: #999;">📄 PDF</div>
+    </div>
+
+    <div class="folder-wrapper">
+      <svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="Yellow glass folder icon">
+        <defs>
+          <linearGradient id="yellowGlass" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="#FFF9D7" stop-opacity="0.98"/>
+            <stop offset="0.3" stop-color="#FFEC8B" stop-opacity="0.95"/>
+            <stop offset="0.7" stop-color="#FFD23F" stop-opacity="0.88"/>
+            <stop offset="1" stop-color="#E6A800" stop-opacity="0.8"/>
+          </linearGradient>
+          <linearGradient id="amberDepth" x1="0" x2="1" y1="0.5" y2="1">
+            <stop offset="0" stop-color="#FFB84D" stop-opacity="0.25"/>
+            <stop offset="1" stop-color="#D98C00" stop-opacity="0.4"/>
+          </linearGradient>
+          <linearGradient id="edgeGlow" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="#FFE57F" stop-opacity="0.6"/>
+            <stop offset="0.5" stop-color="#FFD23F" stop-opacity="0.2"/>
+            <stop offset="1" stop-color="#FFB300" stop-opacity="0.1"/>
+          </linearGradient>
+          <linearGradient id="tabGlass" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="#FFD966" stop-opacity="0.9"/>
+            <stop offset="1" stop-color="#FFB52E" stop-opacity="0.8"/>
+          </linearGradient>
+          <filter id="innerShadow" x="-10%" y="-10%" width="130%" height="130%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur"/>
+            <feOffset dx="0" dy="1" result="offsetBlur"/>
+            <feFlood flood-color="#B37B00" flood-opacity="0.35" result="color"/>
+            <feComposite in="color" in2="offsetBlur" operator="in" result="shadow"/>
+            <feComposite in="shadow" in2="SourceGraphic" operator="over"/>
+          </filter>
+        </defs>
+        <path d="M6 20c0-1.1.9-2 2-2h12l3-3h22c1.1 0 2 .9 2 2v24c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V20z" fill="url(#yellowGlass)" filter="url(#innerShadow)"/>
+        <path d="M6 20c0-1.1.9-2 2-2h12l3-3h22c1.1 0 2 .9 2 2v24c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V20z" fill="url(#amberDepth)" opacity="0.85"/>
+        <path d="M6 20c0-1.1.9-2 2-2h12l3-3h22c1.1 0 2 .9 2 2v24c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V20z" fill="none" stroke="url(#edgeGlow)" stroke-width="0.8" opacity="0.7"/>
+        <path d="M11 17h10l3-3h18c1.1 0 2 .9 2 2v2H11v-1z" fill="url(#tabGlass)"/>
+      </svg>
+    </div>
+  </div>
+
+  <button onclick="triggerFlyIn()">點擊存入文件</button>
+
+  <script>
+    function triggerFlyIn() {
+      const file = document.getElementById('file');
+      
+      // 重置狀態以便重複測試
+      file.classList.remove('fly-in');
+      void file.offsetWidth; // 強制重繪
+      
+      // 加入飛入類名
+      file.classList.add('fly-in');
+      
+      // 動畫結束後恢復（實際應用中通常是移除該 DOM）
+      setTimeout(() => {
+        file.classList.remove('fly-in');
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
